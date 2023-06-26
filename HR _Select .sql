@@ -15,7 +15,7 @@ select * from Salgrade;     -- 연봉에 대한 등급이 저장됨
     JOB   : 직책 
     MANAGER : 직급 상사 (사수) 
     HIREDATE : 입사년월일 
-    SALARY : 연봉 
+    SALARY : 월급 
     COMMISSION : 보너스 
     DNO : 부서번호 
   */
@@ -144,6 +144,145 @@ select * from employee;
 select * 
 from employee
 where manager is null ; 
+
+/* 날짜 검색 하기 */ 
+-- 입사 날짜가 81/02/20 일날 입사한 사원의 이름과 직책과 월급, 입사일을 출력 
+select ename as 이름, job as 직책, salary 월급 , hiredate as 입사일
+from employee
+where hiredate = '81/02/20'; 
+
+-- 81년도에 입사한 사용자만 출력 
+select * from employee; 
+
+select * 
+from employee 
+where hiredate >= '81/01/01' and hiredate <= '81/12/31';    -- 날짜 컬럼 : date 
+
+--where 에서 Like 연산자 사용하기    <== 컬럼의 특정 단어를 검색 할때 사용 : 게시판, 이름, 글내용, 날짜로 검색 
+    -- 문자열의 단어를 검색할때 사용 
+     -- 와일드 카드 식별자 사용 : %  어떤글자가 와도 상관없다. 
+
+-- 이름이 A로 시작 되는 사원을 검색 
+select * 
+from employee 
+where ename like 'A%'; 
+
+select * 
+from employee
+where hiredate like '81%';
+
+-- 직책 (job) 컬럼에서 AG 라는 단어가 들어간 사원 정보를 출력 
+select * 
+from employee 
+where job like '%AG%'; 
+
+/* 중복을 제거 해서 출력 하기 : DISTINCT , 다른 컬럼이 지정되면 오류 발생 , 단일 컬럼에서 사용  */ 
+
+-- 우리 회사의 존재하는 직책을 출력 
+select distinct job 
+from employee; 
+
+-- 우리 회사에 존재하는 부서를 출력 
+select distinct dno 
+from employee ; 
+
+/* 정렬해서 출력 : order by 컬럼명 asc[desc] 
+        asc : 오름 차순 정렬 ,   A -> Z , 1 -> 9      <== 기본값 
+        desc : 내림 차순 정렬 , Z -> A,   9 -> 1
+*/ 
+
+-- 사원테이블의 이름 컬럼을 기준으로 내림 차순 정렬 
+select * 
+from employee
+order by ename desc; 
+
+-- 사원번호를 기준으로 오름차순 정렬 
+select * 
+from employee
+order by eno asc ; 
+
+--최근 입사한 순서대로 출력 하라. 
+select * 
+from employee
+order by  hiredate desc; 
+
+-- 급여가 많은 사원부터 출력하되 월급이 1000만원 이상 사원명, 직책, 급여, 부서번호를 출력 하라. 
+select ename as 사원명, job as 직책, salary 급여, dno 부서번호
+from employee
+where salary >= 1000
+order by salary desc; 
+
+-- NVL 함수 사용하기 : NULL을 0으로 처리하는 함수 
+   -- + / - / * /  NULL관 연산을 수행하면 NULL 로 처리됨 
+   -- NULL 은 비어있는 상태임. 0이 아님.
+   -- NVL (commission, 0)   : commission 컬럼의 null이 존재할 경우 0 로 바꾸어라 
+
+-- NVL 함수를 사용지 않고 전체 년봉을 구하는 컬럼을 출력 
+select * 
+from employee; 
+
+-- 주의 : 사칙 연산을 할때 null 컬럼이 존재하는지 확인 
+
+-- 총 연봉 = 월급(salary) * 12 + Commission(보너스)  
+--전체 연봉을 계산해서 이름, 직책, 월급, 보너스, 총연봉 
+select ename as 이름, job as 직책, salary as 월급, commission as 보너스, 
+       salary *12 + commission  as 총연봉 
+from employee
+
+-- NVL 함수를 사용해서 commission 컬럼의 null을 0으로 대치후 계산후 연봉이 많은순으로 출력  
+select ename as 이름, job as 직책, salary as 월급, commission as 보너스, 
+       salary *12 + NVL(commission,0)  as 총연봉 
+from employee
+order by 총연봉 desc; 
+
+-- null을 검색
+select * from employee
+where commission is null ; 
+
+-- where  컬럼명 between A and B     :  A이상 B이하 
+--월급이 1500이상 3000 이하인 사원명, 직책, 월급(급여), 입사일을 출력하되 최근 입사한 사용자로 정렬해서 출력 
+select * 
+from employee
+where salary >= 1500 and salary <=3000 
+order by hiredate desc; 
+
+select * 
+from employee
+where salary between 1500 and 3000 
+order by hiredate desc; 
+
+/* 레코드 갯수 출력 : count    <== 게시판에서 DB의 전체 레코드 수를  가져와서 페이징 처리를 하기위해서 사용 */ 
+-- count 함수는 null 을 카운트 하지 않는다. 
+-- 특정 컬럼의 평균을 구할때, null을 카운트 할지 카운트 하지 않을지를 지정해야 함. 
+
+select count(*) as "전체 레코드수"
+from employee; 
+
+select count(commission ) as "레코드수"   
+from employee; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

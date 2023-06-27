@@ -232,6 +232,7 @@ from dual ;
 select trunc ( 31/2  ) as 몪만출력 ,  MOD (31, 2) as 나마지만출력
 from dual ; 
 
+
 1. 덧셈 연산자를 사용하여 모든 사원에 대해서 $300의 급여 인상을 계산한후 사원이름, 급여, 인상된 급여를 출력하세요. 
 2. 사원의 이름, 급여, 연간 총 수입이 많은것 부터 작은순으로 출력 하시오. 
     연간 총 수입은 월급에 12를 곱한후 $100의 상여금을 더해서 계산 하시오. 
@@ -243,16 +244,144 @@ from dual ;
 8. 사원의 급여가 2000에서 3000사이에 포함되고 부서번호가 20 또는 30인 사원의 이름, 급여와 부서번호를 출력하되 이름을 오름차순으로 출력하세요. 
 9. 1981년도 입사한 사원의 이름과 입사일을 출력 하시오 ( like 연산자와 와일드 카드 사용 : _ , % )
 10. 관리자가 없는 사원의 이름과 담당업무를 출력하세요.
-11. 커밋션을 받을 수 있는 자격이 되는 사원의 이름, 급여, 커미션을 출력하되 급여및 커밋션을 기준으로 내림차순 정렬하여 표시하시오.
+11. 커밋션을 받을 수 있는 자격이 되는 사원의 이름, 급여, 커미션을 출력하되 급여 및 커밋션을 기준으로 내림차순 정렬하여 표시하시오.
 12. 이름이 세번째 문자인 R인 사원의 이름을 표시하시오.
 13. 이름에 A 와 E 를 모두 포함하고 있는 사원의 이름을 표시하시오.
 14. 담당 업무가 사무원(CLERK) 또는 영업사원(SALESMAN)이며서 
     급여가 $1600, $950, 또는 $1300 이 아닌 사원의 이름, 담당업무, 급여를 출력하시오.
 15. 커미션이 $500이상인 사원의 이름과 급여 및 커미션을 출력하시오.  
+    --완료 시간 : 17: 20분까지 : p.jangwoo@gmail.com
+
+
+select * from employee; 
+/* order by 에서 두 개이상의 컬럼이 정렬될때   */ 
+select * 
+from employee
+order by job asc ; 
+
+-- job asc, ename desc 
+-- 두개 이상의 컬럼이 정렬될때, job 컬럼을 정렬후, job 컬럼의 중복된 값에대해서 ename desc 정렬됨 
+select * 
+from employee
+order by job asc, ename desc ; 
+
+select * 
+from employee
+order by dno desc, ename asc; 
+
+/* 날짜 함수 
+    SYSDATE : 현재 시스템의 날짜를 출력 하는 함수, 
+    MONTHS_BETWEEN : 두 날짜 사이의 개월 수를 출력 
+    ADD_MONTHS : 특정 날짜에 개월수를 더할때 사용 
+    NEXT_DAY : 특정 날짜에서 초래하는 요일을 인자로 받아서 요일이 도래하는 날짜를 출력 
+    LAST_DAY : 달의 마지막 날짜를 반환 
+    ROUND : 날짜를 반올림 하는 함수, 15일이상 : 반올림, 15미만 : 삭제 
+    TRUNC : 날짜를 잘라내는 함수   
+*/ 
+-- 현재 시스템의 날짜를 출력 : 년/월/일 
+select sysdate 
+from dual; 
+
+select sysdate - 1 as 어제, sysdate as 오늘, sysdate + 1 as 내일
+from dual; 
+
+select * from employee; 
+
+-- 입사일로부터 오늘날짜까지 몇일 근무했는지 출력 
+select ename 이름, hiredate 입사일, Round(sysdate - hiredate) 총근무일수 
+from employee; 
+
+-- 입사일로 부터 1000일 지난 시점의 날짜를 출력. 
+select ename 이름, hiredate 입사일, hiredate + 1000 입사천일날짜 
+from employee; 
+
+-- 특정날짜에서 월을 기준으로 출력 
+select hiredate as 원본, trunc ( hiredate, 'MONTH') , ROUND (hiredate, 'MONTH')
+from employee; 
+
+-- months_between : 두 날짜 사이의 개월 수를 출력 
+-- 입사일로 부터 현재까지의 근무한 개월수를 출력 
+select ename, hiredate , trunc (months_between( sysdate, hiredate)) as 근무개월수 
+from employee
+
+-- date (날짜타입) 
+-- add_months (날짜, 개월수) : 날짜에 개월수를 더하는 함수 
+-- 오늘날짜에 100개월을 더한 날짜
+select sysdate as "오늘날짜", add_months (sysdate , 100) as "100개월후" , sysdate + 100 as "100일후"
+from dual;
+
+-- 입사후 6개월이 지난 시점을 출력 
+select ename, hiredate , add_months(hiredate, 6) as "입사후6개월시점"
+from employee; 
+
+-- next_day : 특정날짜에서 요일을 인풋으로 넣어서 도래하는 요일의 날짜를 출력 
+select next_day (sysdate, '월요일')
+from dual; 
+
+-- last_day (date) : date의 마지막 날짜 를 출력 
+select sysdate as 오늘날짜, last_day(sysdate)   
+from dual; 
+
+-- 사원테이블에서 입사일의 마지막 날짜를 출력 
+select hiredate as 입사일, last_day(hiredate)
+from employee; 
+
+/* 형식 변환 함수 
+    TO_CHAR : 날짜, 숫자형을 문자형으로 변환 
+    TO_DATE : 문자형을 날짜형으로 변환 
+    TO_NUMBER : 문자형을 숫자로 변환 
+*/ 
+
+-- TO_CHAR (date, 'YYYYMMDD') : 날짜형식을 'YYYYMMDD' 형식으로 뽑아와서 char 타입으로 변환 
+
+select TO_CHAR (sysdate, 'YYYYMMDD') 
+from dual; 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. 덧셈 연산자를 사용하여 모든 사원에 대해서 $300의 급여 인상을 계산한후 사원이름, 급여, 인상된 급여를 출력하세요. 
+2. 사원의 이름, 급여, 연간 총 수입이 많은것 부터 작은순으로 출력 하시오. 
+    연간 총 수입은 월급에 12를 곱한후 $100의 상여금을 더해서 계산 하시오. 
+3. 급여가 2000을 넘는 사원의 이름과 급여를 급여가 많은것 부터 작은순으로 출력하세요. 
+4. 사원번호가 7788인 사원의 이름과 부서번호를 출력하세요. 
+5. 급여가 2000에서 3000사이에 포함되지 않는 사원의 이름과 급여를 출력 하세요. 
+6. 1981년 2월 20일부터 81년 5월 1일 사이의 입사한 사원의 이름 담당업무, 입사일을 출력하시오
+7. 부서번호가 20및 30에 속한 사원의 이름과 부서번호를 출력하되 이름을 기준(내림차순)으로 출력하시오. 
+8. 사원의 급여가 2000에서 3000사이에 포함되고 부서번호가 20 또는 30인 사원의 이름, 급여와 부서번호를 출력하되 이름을 오름차순으로 출력하세요. 
+9. 1981년도 입사한 사원의 이름과 입사일을 출력 하시오 ( like 연산자와 와일드 카드 사용 : _ , % )
+10. 관리자가 없는 사원의 이름과 담당업무를 출력하세요.
+11. 커밋션을 받을 수 있는 자격이 되는 사원의 이름, 급여, 커미션을 출력하되 급여 및 커밋션을 기준으로 내림차순 정렬하여 표시하시오.
+12. 이름이 세번째 문자인 R인 사원의 이름을 표시하시오.
+13. 이름에 A 와 E 를 모두 포함하고 있는 사원의 이름을 표시하시오.
+14. 담당 업무가 사무원(CLERK) 또는 영업사원(SALESMAN)이며서 
+    급여가 $1600, $950, 또는 $1300 이 아닌 사원의 이름, 담당업무, 급여를 출력하시오.
+15. 커미션이 $500이상인 사원의 이름과 급여 및 커미션을 출력하시오.  
 
 
 

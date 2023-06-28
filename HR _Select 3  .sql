@@ -199,13 +199,184 @@ select sum(salary), round(avg (salary)) as 평균, max (salary), min (salary), job
 from employee
 where hiredate like '81%'
 group by job
-having round(avg (salary)) > 1500
+having (avg (salary)) > 1500
 order by 평균 desc; 
 
 select count (*) 
 from employee
 where hiredate like '81%'
 
+-- rollup : 그룹한 결과 마지막 라인에 전체 결과를 출력 ,
+-- cube   : 각 그룹핑의 마지막 라인에 결과출력, 제일 마지막 라인에 전체 결과도 함께 출력 
+
+-- rollup , cube 를 사용하지 않는 그룹핑 쿼리 
+--
+select sum(salary), round (avg(salary)) as 평균, max(salary), min(salary), dno , count(*) 
+from employee
+group by dno 
+order by dno asc; 
+
+-- rollup 을 사용
+select sum(salary), round (avg(salary)) as 평균, max(salary), min(salary), dno , count(*) 
+from employee
+group by rollup (dno)
+order by dno asc; 
+
+-- cube 를 사용
+select sum(salary), round (avg(salary)) as 평균, max(salary), min(salary), dno , count(*) 
+from employee
+group by cube (dno)
+order by dno asc; 
+
+/* SubQuery (서브 쿼리) : Select 내부의 select 구문, 여러번 작업을 하나의 퀄리에서 실행
+        where 절에서 많이 사용함. 
+*/ 
+
+-- ename 이 SCOTT 인 사원과 동일한 직책의 사원들을 출력하라. 
+/*
+   1. ename 이 SCOTT인 사원의 직책을 가져오는 쿼리 
+   2. 직책을 조건으로 해서 사원을 알아 와야하는 쿼리 
+*/ 
+select * from employee; 
+
+select job 
+from employee 
+where ename = 'SCOTT'; 
+
+select ename from employee where job = 'ANALYST'; 
+
+-- SubQuery를 사용해서 ename 이 SCOTT 인 사원과 동일한 직책의 사원들을 출력하라.
+select ename, salary, job 
+from employee
+where job = ( select job from employee where ename='SCOTT' ); 
+
+-- SMITH 와 동일한 부서를 가진 사원들을 출력 하기 (subquery) 
+select dno from employee where ename='SMITH'; 
+select ename from employee where dno = 20; 
+
+select ename from employee where dno =(select dno from employee where ename='SMITH'); 
+
+-- 'SCOTT' 의 월급보다 많은 사원 정보 출력 하기 
+select ename, salary 
+from employee
+where salary > (Select salary from employee where ename='SCOTT'); 
+
+-- 최소 급여를 받는 사원의 이름과 담당업무 , 급여 출력 하기 
+select ename, job, salary
+from employee
+where salary = ( select min(salary) from employee )
+
+-- 단일 값이 아니라 여러개의 값이 출력될 경우 IN 키워드를 사용 
+
+-- Subquery 를 사용 
+-- 부서별로 최소급여를 받는 사원 정보의 이름, 직책, 월급 을 출력, group by , min , in 키워드 사용해서 출력 
+select ename 이름, job 직책, salary 월급 , dno 부서번호
+from employee
+where salary in (
+    select min (salary) 
+    from employee
+    group by dno 
+)  ; 
+
+-- 각 부서의 최소 급여가 30번 부서의 최소 급여 보다 큰 부서를 출력 ;  ( 5분 ) 
+   1. 30번부서의 최소급여 
+   2. 각 부서의 최소급여를 출력후 having 
+   
+select min(salary), dno , count(*)
+from employee 
+group by dno
+having min(salary) > ( 
+    -- 30번 부서의 초소급여를 출력
+    select min(salary) from employee 
+    where dno = 30 
+) ; 
+
+/*
+    ANY 연산자 : 서브쿼리가 반환하는 각각의 값과 비교함. 
+       --  < any 는 최대값 보다 작음을 나타냄. 
+       --  > any 는 최소값 보다 큼을 나타냄. 
+       --  = any 는 IN 과 동일한 키워드 
+       
+    ALL 연산자 : 서브쿼리에서 반환되는 모든 값을 비교함. 
+        --  < all 는 최소값 보다 작음 나타냄  
+        --  > all 는 최대값 보다 큼을 나타냄
+*/ 
+
+-- 직급이 SALESMAN이 아니면서 직급이 SALESMAN인 사원보다 급여가 적은 사원을 모두 출력 
+select * from employee order by job asc ; 
+
+
+-- ALL 연산자를 사용해서 출력 
+select ename, job, salary 
+from employee 
+where salary < all ( select salary from employee
+                       where job = 'SALESMAN') 
+    and job != 'SALESMAN';    -- !=    ,    <> 
+
+-- min 을 사용해서 출력 
+select ename, job, salary 
+from employee 
+where salary <  ( select min(salary) from employee
+                       where job = 'SALESMAN') 
+    and job != 'SALESMAN';
+
+-- 담당 업무가 분석가(ANALYST) 인 사원보다 급여가 적으면서 업무가 분서가가 아닌사원들을 출력 
+
+-- ALL 연산자를 사용해서 출력 
+select ename, job, salary 
+from employee 
+where salary < all ( select salary from employee
+                       where job = 'ANALYST') 
+    and job != 'ANALYST';    -- !=    ,    <> 
+
+-- min 을 사용해서 출력 
+select ename, job, salary 
+from employee 
+where salary <  ( select min(salary) from employee
+                       where job = 'ANALYST') 
+    and job != 'ANALYST';
+  
+  =====================================================================  
+1. SUBSTR 함수를 사용하여 사원들의 입사한 년도와 입사한 달만 출력 하시오. 
+2. SUBSTR 함수를 사용하여 4월에 입사한 사원을 출력 하시오.
+3. MOD 함수를 사용하여 직속상관이 홀수인 사원만 출력하시오. 
+4. MOD 함수를 사용하여 월급이 3의 배수인 사원들만 출력하세요.
+5. 입사한 년도는 2자리 (YY), 월은 (MON)로 표시하고 요일은 약어 (DY)로 지정하여 출력 하시오. 
+6. 올해 몇 일이 지났는지 출력 하시오. 현재 날짜에서 올해 1월 1일을 뺀 결과를 출력하고 TO_DATE 함수를 사용하여
+   데이터 형식을 일치 시키시오.
+7. 자신이 태어난 날짜에서 현재까지 몇 일이 지났는지 출력 하세요. 
+8. 자신이 태어난 날짜에서 현재까지 몇 개월이 지났는지 출력 하세요.
+9. 사원들의 상관 사번을 출력하되 상관이 없는 사원에 대해서는 null 갑대신 0으로 출력 하시오.
+10.   사원번호,
+      [사원번호 2자리만출력 나머지는 *가림 ] as "가린번호", 
+      이름, 
+       [이름의 첫자만 출력 총 네자리, 세자리는 * 가림] as "가린이름"       
+11.  주민번호:   를 출력하되 801210-1*******   출력 하도록 , 전화 번호 : 010-12*******
+	dual 테이블 사용
+=============================================================================
+모든 평균은 소숫점 2자리까지 출력하되 반올림 해서 출력 하시오.  
+1.  10 번 부서를 제외하고 각 부서별 월급의 합계와 평균과 최대값, 최소값을 구하시오. 
+2.  직책의 SALSMAN, PRESIDENT, CLERK 을 제외한 각 부서별 월급의 합계와 평균과 최대값, 최소값을 구하시오.   	
+3. SMITH 과 동일한 부서에 근무하는 사원들 의 월급의 합계와 평균과 최대값, 최소값을 구하시오. 
+4. 부서별 최소월급을 가져오되 최소월급이 1000 이상인 것만 출력하세요. 
+5.  부서별 월급의 합계가 9000 이상것만 출력
+6.  부서별 월급의 평균이 2000 이상만 출력
+7. 월급이 1500 이하는 제외하고 각 부서별로 월급의 평균을 구하되 월급의 평균이 2500이상인 것만 출력 하라. 
+8. sub query - 부서별로 최소 급여를 받는 사용자의 이름과 급여와 직책과 부서번호를 출력하세요. 
+9. sub query - 전체 평균 급여보다 많이 받는 사용자의  이름과 급여와 직책과 부서번호를 출력하세요. 
+10. sub query - 급여가 평균 급여보다 많은 사원들의 사원번호와 이름을 표시하되 결과를 급여에 대해 오름차순 정렬하시오. 
+
+
+
+
+
+
+
+
+
+
+   
+    
 
 
 

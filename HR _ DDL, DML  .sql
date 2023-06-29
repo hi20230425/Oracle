@@ -111,10 +111,68 @@ select * from dept;
 
 update dept 
 set dname = '제조부'
-where dno = 40; 
+where dno = 40;         -- 
 
 rollback; 
 commit; 
+
+insert into dept ( dno, dname )
+values (40, '판매부') ; 
+
+-- dno : where 절 사용, 중복된 값이 저장되지않는 컬럼을 사용 ( primary key, Unique ) 
+update dept 
+set dname = 'HR', loc = '대전'
+where dno = 40; 
+
+-- 테이블에는 Primary Key 컬럼이 존재해야 한다.   <== 중복된 값을 넣을수 없도록 제약을 설정  
+
+
+-- delete : 테이블의 특정 레코드 삭제 : 주의 : : 반드시 where조건(Primary Key, Unique 컬럼 ) 을 사용해야 한다.
+delete dept
+where dno = 40; 
+
+commit; 
+
+
+/* 제약 조건 : 컬럼에 부여되는 제약, Primary Key, Unique, Default, Not null, Check, 
+        특정 컬럼에 무결성 을 확보하기 위해서 부여 
+    Primary Key : 
+        -- 중복된 값을 넣지 못하도록 설정
+        -- NOT NULL 
+        -- 테이블에 한번만 넣을 수 있다. 여러 컬럼에 하나의 Primary Key 를 넣을 수 있다. 
+        -- INDEX 가 자동으로 생성된다.   <== 검색을 빠르게 함. 
+        -- update, delete 시 where 절에서 사용되는  컬럼 
+*/ 
+
+create table member1 (
+    id varchar2(50) not null Primary key, 
+    pass varchar2(50) not null , 
+    addr varchar2(100) null, 
+    phone varchar2(30) null,
+    age number (3) ,        -- 정수 3자리
+    weight number(5,2)      -- 실수 : 전체 5자리, 소숫점이하 2자리 
+); 
+
+-- Insert 
+insert into member1 
+values ( 'ddd', 'aaa', '서울', '010-1111-1111', 20, 70.55); 
+
+select * from member1; 
+
+commit ; 
+
+-- update 시 where 조건에 primary key 컬럼을 조건으로 처리 
+
+update member1 
+set addr = '부산', phone = '010-2222-2222', age = 30, weight = 88.55
+where id = 'bbb' 
+
+-- delete 시 where 조건에 primary key 컬럼을 조건으로 처리
+delete member1
+where id ='ccc'; 
+
+
+
 
 
 

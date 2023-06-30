@@ -233,9 +233,9 @@ group by rollup (dno,job)
 order by dno asc; 
 
 -- cube 를 사용
-select sum(salary), round (avg(salary)) as 평균, max(salary), min(salary), dno , count(*) 
+select sum(salary), round (avg(salary)) as 평균, max(salary), min(salary), dno,job , count(*) 
 from employee
-group by cube (dno)
+group by cube (dno,job)
 order by dno asc; 
 
 /* SubQuery (서브 쿼리) : Select 내부의 select 구문, 여러번 작업을 하나의 퀄리에서 실행

@@ -340,7 +340,7 @@ select * from ParentTbl;
 
 -- 자식 테이블 생성 ( FK ) 
 create table ChildTbl (
-    id varchar2(40) constraint PK_ChildTbl Primary Key,
+    id varchar2(40) constraint PK_ChildTbl_id Primary Key,
     pw varchar2(40), 
     info number, 
         constraint FK_ChildTbl_info foreign key (info) references ParentTbl(info)

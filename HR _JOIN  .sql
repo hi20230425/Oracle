@@ -192,6 +192,187 @@ select ename, job, e.dno,d.dno dname, loc
 from dept05 d LEFT OUTER JOIN emp05 e
 on d.dno = e.dno  
 
+-- Oracle Equie JOIN 
+
+-- 카타르시안 곱 ( 앞 테입블의 모든레코드가 뒷 테이블의 레코드 각 각 매칭 )
+-- where 조건에서 두 공통 키 컬럼이 같은 항목만 출력 . 
+select  * 
+from employee e , department d
+where e.dno = d.dno 
+and salary > 2000; 
+
+/* NATURAL JOIN : 오라클에서만 사용되는 JOIN,
+     - 두 테이블의 공통 키 컬럼을 Oracle 이 자동으로 찾아서 JOIN  
+     - Select 구문에 공통 키 컬럼에 테이블을 명시하면 오류가 발생됨 
+     - from 절에 NATURAL JOIN 키워드를 사용함.
+     - where 절에 공통 키 컬럼을 명시 하지 않음. (오라클에서 두 테이블의 공통 키컬럼을 자동으로 찾아서 처리함. ) 
+     - where 절에 조건을 처리함 
+*/ 
+
+-- NATURAL JOIN 으로 JOIN  
+-- <== 두 테이블의 공통 키컬럼을 자동으로 찾아서 JOIN , select 절에 공통 키 컬럼을 출력시 테이블이름을 명시하면 오류가발생됨
+
+select eno, ename, salary , dno, dname, loc
+from emp05 e natural join dept05 d
+where salary > 2000; 
+
+-- EQUI JOIn
+select eno, ename, salary , e.dno, dname, loc
+from emp05 e , dept05 d
+where e.dno = d.dno
+and salary > 2000; 
+
+-- Ansi SQL JOIN : 모든 DBMS에서 사용되는 구문 : Oracle, MS-SQL, My-SQL, Postgre, MariaDB, ... 
+select eno, ename, salary, e.dno dname, loc
+from emp05 e join dept05 d
+on e.dno = d.dno 
+where salary > 2000; 
+
+
+/* SELF JOIN : 자신의 테이블을 다시한번 JOIN 
+      -- 반드시 테이블 별칭을 사용해서 JOIN 해야함.
+      -- select 절에 컬럼을 명시할때 별칭이름의 테이블명을 명시해야함. 
+      -- 조직도, 상사 정보를 자신의 테이블에서 조회 할때 사용함.       
+      */ 
+
+select * from emp05; 
+
+-- SELF JOIN 을 사용해서 사원의 직속 상관정보(이름) 를 출력 
+
+select eno 사원번호 , ename 사원명, manager 직속상관
+from employee
+where manager= 7788
+order by ename asc; 
+
+select eno 사원번호 , ename 사원명, manager 직속상관
+from employee
+where eno= 7788
+order by ename asc; 
+
+-- SELF JOIN 을 사용해서 직속 상관 정보를 한번에 출력 . ( EQUI JOIN) 
+select e.eno 사원번호, e.ename 사원이름, e.manager 직속상관번호, m.eno 직속상관사원번호, m.ename 직속상관이름
+from emp05 e , emp05 m 
+where e.manager = m.eno
+order by e.ename asc 
+
+select eno, ename, manager, eno, ename ,manager
+from emp05
+
+-- SELF JOIN 을 사용해서 직속 상관 정보를 한번에 출력 . (ANSI JOIN)
+select e.eno 사원번호, e.ename 사원이름, e.manager 직속상관번호, m.eno 직속상관사원번호, m.ename 직속상관이름
+from emp05 e Join emp05 m 
+on e.manager = m.eno
+order by e.ename asc 
+
+select * from emp05; 
+
+-- select 문에서 || 를 사용하면 문자열과 연결 할 수 잇음. 
+select '사원명 : ' || ename || ' 은 월급이 ' || salary || '입니다.'  as 사원급여정보
+from emp05; 
+
+-- 사원명의 직속상관이름을 SELF JOIN으로 바로 출력 
+select  e.ename 사원이름, m.ename 직속상관이름
+from emp05 e Join emp05 m 
+on e.manager = m.eno
+order by e.ename asc 
+
+-- KING은 Manager 가 존재하지 않는 정보도 Outer Join 을 통해서 출력 
+
+select  e.ename ||'의 직속상관 이름은 ' || m.ename || ' 입니다' as "사원에 대한 직속상관 명"
+from emp05 e  LEFT Outer Join emp05 m 
+on e.manager = m.eno
+order by e.ename asc 
+
+/* CROSS JOIN : 카타르시안 곱 : 앞테이블의 하나의 레코드에서 뒤테이블의 모든 레코드와 연결 
+        : 앞 뒤 테이블의 모든 내용을 곱해서 성능 체크 시 사용. 
+*/ 
+
+-- ANSI JOIN 으로 출력 ( 14 * 5 = 70개 레코드 출력 ) 
+select * 
+from emp05 e cross join dept05 d
+
+-- EQUIE JOIN 
+select * 
+from emp05 e , dept05 e ; 
+
+show user; 
+
+
+-- VIEW 생성 할 수 있는 권한 할당 (System 계정으로 접속후 실행 ) 
+GRANT CREATE ANY VIEW TO "C##HR" WITH ADMIN OPTION;
+GRANT DROP ANY VIEW TO "C##HR" WITH ADMIN OPTION;
+
+
+-- VIEW : 가상의 테이블 , 코드가 저장된 가상 테이블 
+    -- VIEW는 데이터를 가지고 있지 않는다. select 코드가 들어있다. 
+    -- 마치 테이블 처럼 사용됨. 
+    -- view 는 select 구문이 들어가 있음. 
+    
+    -- 1. 보안을 위해서 사용됨. ( 실제 테이블의 특정 컬럼만 출력 ) 
+    -- 2. 복잡한 쿼리를 저장후 호출해서 사용 ( JOIN, )
+ 
+-- 뷰를 생성 (보안을 위해 생성한 view )     
+create view v_emp 
+as 
+select ename, salary from emp05; 
+
+select * from emp05 ; 
+
+-- 뷰 실행 
+select * from v_emp; 
+
+-- view 정보를 확인 하는 데이터 사전 : user_views 
+select * from user_views;      -- 현재 로그인한  계정에서 생성된 모든 view를 확인 
+
+-- View 생성 : emp05 테이블과 dept05 테이블을 JOIN 하는 구문 
+create view v_emp_dept 
+as 
+select eno, ename, job, salary, e.dno, dname, loc
+from emp05 e , dept05 d
+where e.dno = d.dno
+
+-- View 실행 
+select * from v_emp_dept; 
+
+drop view v_emp_dept; 
+
+
+-- 자신의 지속 상사를 출력 하는 view 생성 
+
+select * from emp05 ; 
+
+select eno, ename, manager, eno, ename, manager 
+from emp05; 
+
+create view v_sasu_info 
+as 
+select e.ename 사원원이름 ,e.manager , m.eno,  m.ename 직속상관 
+from emp05 e JOIN emp05 m 
+on e.manager = m.eno 
+order by e.ename asc 
+
+select * from v_sasu_info; 
+
+-- view 의 저장된 코드 정보를 확인 : 데이터 사전을 사용해서 확인 
+select * from user_views; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
